@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Stage, Layer, Circle, Line, Text } from 'react-konva';
 import io from 'socket.io-client';
 import './styles/AnnotationTool.scss';
@@ -7,15 +7,52 @@ const AnnotationTool = ({ onAnnotationsChange, userId, username }) => {
   const [points, setPoints] = useState([]);
   const [videoFrame, setVideoFrame] = useState(null);
   const [figureNumber, setFigureNumber] = useState(0);
+  const [socket, setSocket] = useState(null);
   const stageRef = useRef(null);
-  const socketRef = useRef(null);
+
+  const connectSocket = useCallback(() => {
+    const newSocket = io.connect('http://localhost:5001', {
+      transports: ['websocket'],
+      upgrade: false
+    });
+
+    newSocket.on('connect', () => {
+      console.log('Connected to server');
+      newSocket.emit('start_stream', { parkingSpaces: [] });
+    });
+
+    newSocket.on('video_frame', (data) => {
+      const arrayBufferView = new Uint8Array(data);
+      const blob = new Blob([arrayBufferView], { type: 'image/jpeg' });
+      const urlCreator = window.URL || window.webkitURL;
+      const imageUrl = urlCreator.createObjectURL(blob);
+      setVideoFrame(imageUrl);
+    });
+
+    newSocket.on('disconnect', () => {
+      console.log('Disconnected from server');
+    });
+
+    setSocket(newSocket);
+
+    return () => {
+      newSocket.disconnect();
+    };
+  }, []);
+
+  useEffect(() => {
+    connectSocket();
+  }, [connectSocket]);
 
   const handleStageMouseDown = (e) => {
     if (userId && points.length < 4) {
       const pos = stageRef.current.getPointerPosition();
-      const newPoints = [...points, { x: pos.x, y: pos.y }];
-      setPoints(newPoints);
+      addPoint(pos.x, pos.y);
     }
+  };
+
+  const addPoint = (x, y) => {
+    setPoints((prevPoints) => [...prevPoints, { x, y }]);
   };
 
   const handleClearAnnotations = () => {
@@ -49,32 +86,18 @@ const AnnotationTool = ({ onAnnotationsChange, userId, username }) => {
   };
 
   useEffect(() => {
-    socketRef.current = io.connect('http://localhost:5001', {
-      transports: ['websocket'],
-      upgrade: false
-    });
-
-    socketRef.current.on('connect', () => {
-      console.log('Connected to server');
-      socketRef.current.emit('start_stream', { parkingSpaces: [] });
-    });
-
-    socketRef.current.on('video_frame', (data) => {
-      const arrayBufferView = new Uint8Array(data);
-      const blob = new Blob([arrayBufferView], { type: 'image/jpeg' });
-      const urlCreator = window.URL || window.webkitURL;
-      const imageUrl = urlCreator.createObjectURL(blob);
-      setVideoFrame(imageUrl);
-    });
-
-    socketRef.current.on('disconnect', () => {
-      console.log('Disconnected from server');
-    });
-
-    return () => {
-      if (socketRef.current) {
-        socketRef.current.disconnect();
+    const handleResize = () => {
+      if (stageRef.current) {
+        stageRef.current.setAttrs({
+          width: window.innerWidth,
+          height: window.innerHeight
+        });
       }
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => {
+      window.removeEventListener('resize', handleResize);
     };
   }, []);
 
