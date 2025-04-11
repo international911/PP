@@ -1,0 +1,72 @@
+.header {
+  position: relative;
+  width: 100%;
+  height: 100vh;
+  background-size: cover;
+  background-position: center;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  color: white;
+  background-color: rgba(0, 0, 0, 0.7); // Затемнение фона
+  background-blend-mode: multiply; // Смешивание цветов для затемнения
+
+  .header-content {
+    text-align: center;
+    position: relative;
+
+    h1 {
+      font-size: 3.5rem; // Размер заголовка
+      margin-bottom: 0.5rem;
+      font-weight: bold;
+      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+    }
+
+    p {
+      font-size: 1.3rem; // Размер текста
+      margin-bottom: 2rem;
+      font-weight: normal;
+      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+    }
+
+    .buttons {
+      display: flex;
+      flex-direction: row;
+      justify-content: center;
+      gap: 20px; // Отступ между кнопками
+
+      .camera-button {
+        padding: 15px 20px;
+        background-color: rgba(255, 255, 255, 0.8);
+        color: #333;
+        border: none;
+        border-radius: 12px;
+        cursor: pointer;
+        font-size: 1rem;
+        text-decoration: none;
+        transition: background-color 0.3s;
+
+        &:hover {
+          background-color: rgba(255, 255, 255, 0.6);
+        }
+      }
+    }
+
+    .user-icon {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      width: 40px;
+      height: 40px;
+      cursor: pointer;
+      background: none;
+
+      img {
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+      }
+    }
+  }
+}

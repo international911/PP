@@ -1,0 +1,18 @@
+.main-content {
+  display: flex;
+  justify-content: center; // Центрирование блока по горизонтали
+  align-items: center; // Центрирование блока по вертикали
+  padding: 30px;
+  background-color: white;
+  height: 100vh; // Высота блока равна высоте окна
+  margin-top: 0.1px;
+  padding-top: 0.1px;
+
+  p {
+    text-align: left; // Выравнивание текста по левому краю
+    font-size: 2.2rem;
+    color: #343a40;
+    max-width: 1000px; // Максимальная ширина текста
+    width: 100%; // Ширина текста равна ширине блока
+  }
+}

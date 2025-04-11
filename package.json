@@ -1,0 +1,20 @@
+{
+  "name": "parking-management-system",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "start": "concurrently \"npm run start:frontend\" \"npm run start:backend\" \"npm run start:ai\"",
+    "start:frontend": "cd frontend && npm start",
+    "start:backend": "cd parking-management-system && nodemon index.js",
+    "start:ai": "cd parking-management-system/ai_model && python video_processing.py"
+  },
+  "devDependencies": {
+    "concurrently": "^6.2.0",
+    "nodemon": "^2.0.7"
+  },
+  "dependencies": {
+    "crypto-browserify": "^3.12.1",
+    "stream-browserify": "^3.0.0",
+    "util": "^0.12.5"
+  }
+}
