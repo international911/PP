@@ -15,15 +15,21 @@ socketio = SocketIO(app, cors_allowed_origins="*")
 # Загрузка предобученной модели YOLOv8
 model = YOLO('yolov8n.pt')
 
-parking_spaces = []
+def process_frame(frame, width, height, parking_spaces):
+    """
+    Обрабатывает кадр, определяя занятость парковочных мест с использованием модели YOLOv8.
 
-def process_frame(frame, width, height):
-    global parking_spaces
+    :param frame: Кадр из видеопотока.
+    :param width: Ширина кадра.
+    :param height: Высота кадра.
+    :param parking_spaces: Список парковочных мест с координатами.
+    :return: Обработанный кадр и статус парковочных мест.
+    """
     if not parking_spaces:
         print("No parking spaces defined")
         return frame, []
 
-    status = [False] * len(parking_spaces)
+    status = [False] * len(parking_spaces)  # Инициализация состояния парковочных мест
 
     results = model(frame)
     for result in results:
@@ -44,6 +50,16 @@ def process_frame(frame, width, height):
     return frame, status
 
 def draw_parking_spaces(frame, parking_spaces, status, width, height):
+    """
+    Рисует парковочные места на кадре.
+
+    :param frame: Кадр из видеопотока.
+    :param parking_spaces: Список парковочных мест с координатами.
+    :param status: Статус занятости парковочных мест.
+    :param width: Ширина кадра.
+    :param height: Высота кадра.
+    :return: Кадр с нарисованными парковочными местами.
+    """
     for i, space in enumerate(parking_spaces):
         if not isinstance(space, dict) or 'parkingSpace' not in space or len(space['parkingSpace']) != 4:
             print(f"Invalid parking space coordinates at index {i}: {space}")
@@ -97,12 +113,12 @@ def handle_start_stream(data):
             height, width, _ = frame.shape
             print('Processing frame:', frame.shape)
 
-            processed_frame, status = process_frame(frame, width, height)
+            processed_frame, status = process_frame(frame, width, height, parking_spaces)
             _, buffer = cv2.imencode('.jpg', processed_frame)
             emit('video_frame', buffer.tobytes())
             emit('update_parking_spaces', {'parkingSpaces': parking_spaces, 'status': status})
 
-            time.sleep(0.1) 
+            time.sleep(0.1)
         except requests.exceptions.RequestException as e:
             print(f"Request error: {e}")
             break
